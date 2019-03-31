@@ -47,6 +47,35 @@ module.exports = function (app, swig, gestorBD) {
         if (req.query.busqueda != null) {
             criterio = {"nombre": {$regex: ".*" + req.query.busqueda + ".*"}};
         }
+        var pg = parseInt(req.query.pg); // Es String !!!
+        if (req.query.pg == null) { // Puede no venir el param
+            pg = 1;
+        }
+
+        gestorBD.obtenerCancionesPg(criterio, pg, function (canciones, total) {
+            if (canciones == null) {
+                res.send("Error al listar ");
+            } else {
+                var ultimaPg = total / 4;
+                if (total % 4 > 0) { // Sobran decimales
+                    ultimaPg = ultimaPg + 1;
+                }
+                var paginas = []; // paginas mostrar
+                for (var i = pg - 2; i <= pg + 2; i++) {
+                    if (i > 0 && i <= ultimaPg) {
+                        paginas.push(i);
+                    }
+                }
+                var respuesta = swig.renderFile('views/btienda.html',
+                    {
+                        canciones: canciones,
+                        paginas: paginas,
+                        actual: pg
+                    });
+                res.send(respuesta);
+            }
+        });
+        /*
         gestorBD.obtenerCanciones(criterio, function (canciones) {
             if (canciones == null) {
                 res.send("Error al listar ");
@@ -57,7 +86,8 @@ module.exports = function (app, swig, gestorBD) {
                     });
                 res.send(respuesta);
             }
-        });
+        });*/
+
     });
 
     app.get('/cancion/:id', function (req, res) {
