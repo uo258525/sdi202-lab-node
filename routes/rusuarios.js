@@ -9,22 +9,33 @@ module.exports = function (app, swig, gestorBD) {
     });
 
     app.post('/usuario', function (req, res) {
-        var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
-            .update(req.body.password).digest('hex');
-        var usuario = {
-            email: req.body.email,
-            password: seguro
-        }
-        gestorBD.insertarUsuario(usuario, function (id) {
-            if (id == null) {
-                res.send("Error al insertar ");
+        var criterio = {"email": req.body.email};
+
+        gestorBD.obtenerUsuarios(criterio, function (todosUsuarios)
+        {
+            if (todosUsuarios.length > 0) {
+                res.send("Usuario ya registrado");
             } else {
-                res.send('Usuario Insertado ' + id);
+                var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
+                    .update(req.body.password).digest('hex');
+                var usuario = {
+                    email: req.body.email,
+                    password: seguro
+                }
+                gestorBD.insertarUsuario(usuario, function (id) {
+                    if (id == null) {
+                        res.send("Error al insertar ");
+                    } else {
+                        res.send('Usuario Insertado ' + id);
+                    }
+
+                });
             }
-        });
+        })
+
     })
 
-    app.get("/identificarse", function(req, res) {
+    app.get("/identificarse", function (req, res) {
         var respuesta = swig.renderFile('views/bidentificacion.html', {});
         res.send(respuesta);
     });
@@ -34,15 +45,15 @@ module.exports = function (app, swig, gestorBD) {
         res.send("Usuario desconectado");
     });
 
-    app.get("/publicaciones", function(req, res) {
-        var criterio = { autor : req.session.usuario };
-        gestorBD.obtenerCanciones(criterio, function(canciones) {
+    app.get("/publicaciones", function (req, res) {
+        var criterio = {autor: req.session.usuario};
+        gestorBD.obtenerCanciones(criterio, function (canciones) {
             if (canciones == null) {
                 res.send("Error al listar ");
             } else {
                 var respuesta = swig.renderFile('views/bpublicaciones.html',
                     {
-                        canciones : canciones
+                        canciones: canciones
                     });
                 res.send(respuesta);
             }
@@ -50,14 +61,14 @@ module.exports = function (app, swig, gestorBD) {
     });
 
 
-    app.post("/identificarse", function(req, res) {
+    app.post("/identificarse", function (req, res) {
         var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
             .update(req.body.password).digest('hex');
         var criterio = {
-            email : req.body.email,
-            password : seguro
+            email: req.body.email,
+            password: seguro
         }
-        gestorBD.obtenerUsuarios(criterio, function(usuarios) {
+        gestorBD.obtenerUsuarios(criterio, function (usuarios) {
             if (usuarios == null || usuarios.length == 0) {
                 req.session.usuario = null;
                 res.send("No identificado: ");
@@ -67,7 +78,6 @@ module.exports = function (app, swig, gestorBD) {
             }
         });
     });
-
 
 
 };

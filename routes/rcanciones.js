@@ -29,6 +29,7 @@ module.exports = function (app, swig, gestorBD) {
         */
         var respuesta = swig.renderFile('views/bagregar.html', {});
         res.send(respuesta);
+
     });
     //tener claro si hay que usar re.query, reg.params, reg.body
     app.get('/canciones/:id', function (req, res) {
@@ -89,8 +90,18 @@ module.exports = function (app, swig, gestorBD) {
         });
     });
 
+    app.get('/cancion/eliminar/:id', function (req, res) {
+        var criterio = {"_id": gestorBD.mongo.ObjectID(req.params.id)};
+        gestorBD.eliminarCancion(criterio, function (canciones) {
+            if (canciones == null) {
+                res.send(respuesta);
+            } else {
+                res.redirect("/publicaciones");
+            }
+        });
+    });
 
-    app.post("/cancion", function (req, res) {
+ app.post("/cancion", function (req, res) {
         //no es necesario al añadir routerUsuarioSession
         /*
         if ( req.session.usuario == null){
@@ -123,7 +134,9 @@ module.exports = function (app, swig, gestorBD) {
                                     if (err) {
                                         res.send("Error al subir el audio");
                                     } else {
-                                        res.send("Agregada id: " + id);
+                                        //res.send("Agregada id: " + id);
+                                        res.redirect("/tienda");
+
                                     }
                                 });
                             }
