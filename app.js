@@ -84,8 +84,6 @@ routerAudios.use(function(req, res, next) {
 //Aplicar routerAudios
 app.use("/audios/",routerAudios);
 
-
-
 //antes de mirar controladores mirar public lo primero
 app.use(express.static('public'));
 
@@ -93,7 +91,11 @@ app.use(express.static('public'));
 require("./routes/rusuarios.js")(app, swig,gestorBD); // (app, param1, param2, etc.)
 require("./routes/rcanciones.js")(app, swig,gestorBD); // (app, param1, param2, etc.)
 
+app.get('/', function (req, res) {
+    res.redirect('/tienda');
+});
+
 // lanzar el servidor
 app.listen(app.get('port'), function () {
     console.log("Servidor activo");
-})
+});
