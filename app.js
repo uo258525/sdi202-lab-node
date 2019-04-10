@@ -107,6 +107,7 @@ app.use(express.static('public'));
 //Rutas/controladores por lógica
 require("./routes/rusuarios.js")(app, swig, gestorBD); // (app, param1, param2, etc.)
 require("./routes/rcanciones.js")(app, swig, gestorBD); // (app, param1, param2, etc.)
+require("./routes/rapicanciones.js")(app, gestorBD);
 
 app.get('/', function (req, res) {
     res.redirect('/tienda');
@@ -118,6 +119,8 @@ app.use( function (err, req, res, next ) {
         res.send("Recurso no disponible");
     }
 });
+
+
 // lanzar el servidor
 https.createServer({
     key: fs.readFileSync('certificates/alice.key'),
